@@ -1,0 +1,7 @@
+"""День 2. Первый тест каркаса: сервис поднимается и отвечает."""
+
+
+def test_health_returns_200(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json() == {"status": "ok"}
