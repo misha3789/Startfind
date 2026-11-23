@@ -1,4 +1,4 @@
-"""Дни 3–4. 14 тестов ограничений БД: каждый пытается нарушить правило и ждёт IntegrityError.
+"""Дни 3–4. Тесты ограничений БД по контракту ADR-001.
 
 Это «последний рубеж» защиты (документ «Обработка исключительных ситуаций», 6.1).
 Ещё два ограничения проверяются на уровне Domain Layer и появятся позже:
@@ -13,12 +13,12 @@ from app.models import (Application, Notification, Project, ProjectRole, RoleSki
 
 # ---- мини-фабрики --------------------------------------------------------------
 def user(s, tg=1):
-    u = User(telegram_id=tg, first_name="Тест")
+    u = User(telegram_id=tg, name="Тест")
     s.add(u); s.commit(); return u
 
 
 def skill(s, name="Python"):
-    k = Skill(name=name, name_normalized=name.lower())
+    k = Skill(name=name, direction="backend")
     s.add(k); s.commit(); return k
 
 
@@ -27,8 +27,8 @@ def profile(s, u):
     s.add(p); s.commit(); return p
 
 
-def project(s, founder):
-    p = Project(founder_id=founder.id, title="Startfind")
+def project(s, owner):
+    p = Project(owner_id=owner.id, title="Startfind")
     s.add(p); s.commit(); return p
 
 
@@ -48,7 +48,7 @@ def violates(session, obj):
 # ---- 14 ограничений БД -----------------------------------------------------------
 def test_01_users_telegram_id_unique(session):                          # ИС-03
     user(session, tg=77)
-    violates(session, User(telegram_id=77, first_name="Дубль"))
+    violates(session, User(telegram_id=77, name="Дубль"))
 
 
 def test_02_user_roles_unique_user_role(session):                       # ИС-05
@@ -62,9 +62,8 @@ def test_03_user_roles_role_check(session):
     violates(session, UserRole(user_id=u.id, role="superuser"))
 
 
-def test_04_skills_name_normalized_unique(session):                     # ИС-09: «python» = «Python»
-    skill(session, "Python")
-    violates(session, Skill(name="python", name_normalized="python"))
+def test_04_skills_name_required(session):
+    violates(session, Skill(name=None, direction="backend"))
 
 
 def test_05_specialist_profiles_user_unique(session):
@@ -96,7 +95,7 @@ def test_09_role_skills_unique_pair(session):
 
 def test_10_projects_status_check(session):
     f = user(session)
-    violates(session, Project(founder_id=f.id, title="X", status="deleted"))
+    violates(session, Project(owner_id=f.id, title="X", status="deleted"))
 
 
 def test_11_project_roles_hours_not_negative(session):                  # ИС-10
@@ -116,17 +115,22 @@ def test_13_applications_status_check(session, bad):                    # ИС-3
     violates(session, Application(specialist_profile_id=prof.id, project_role_id=r.id, status=bad))
 
 
-def test_13b_applications_accepts_all_six_statuses(session):
+def test_13b_applications_accepts_architecture_statuses(session):
     r = role(session, project(session, user(session, 100)))
-    for i, status in enumerate(("sent", "viewed", "accepted", "rejected", "postponed", "withdrawn")):
+    for i, status in enumerate(("sent", "viewed", "accepted", "rejected", "postponed")):
         prof = profile(session, user(session, i + 1))
         session.add(Application(specialist_profile_id=prof.id, project_role_id=r.id, status=status))
     session.commit()
 
 
+def test_13c_applications_rejects_withdrawn_status(session):
+    prof = profile(session, user(session, 1)); r = role(session, project(session, user(session, 2)))
+    violates(session, Application(specialist_profile_id=prof.id, project_role_id=r.id, status="withdrawn"))
+
+
 def test_14_notifications_status_check(session):
     u = user(session)
-    violates(session, Notification(user_id=u.id, kind="new_application", status="delivered"))
+    violates(session, Notification(user_id=u.id, type="new_application", status="delivered"))
 
 
 # ---- дополнительные проверки того же рубежа --------------------------------------
@@ -136,8 +140,9 @@ def test_extra_project_roles_status_check(session):
 
 
 def test_extra_team_members_status_check(session):
-    u = user(session); r = role(session, project(session, user(session, 2)))
-    violates(session, TeamMember(project_role_id=r.id, user_id=u.id, status="banned"))
+    specialist = profile(session, user(session)); p = project(session, user(session, 2)); r = role(session, p)
+    violates(session, TeamMember(project_id=p.id, project_role_id=r.id,
+                                 specialist_profile_id=specialist.id, status="banned"))
 
 
 def test_extra_applications_foreign_key_role(session):                  # ИС-17: роль не существует

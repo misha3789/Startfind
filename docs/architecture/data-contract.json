@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "source": "архитектура 2.pdf, раздел организации данных",
+  "tables": {
+    "users": {
+      "columns": ["id", "telegram_id", "name", "status", "created_at", "updated_at"],
+      "unique": [["telegram_id"]],
+      "foreign_keys": {}
+    },
+    "user_roles": {
+      "columns": ["id", "user_id", "role"],
+      "unique": [["user_id", "role"]],
+      "foreign_keys": {"user_id": "users"},
+      "values": {"role": ["specialist", "founder", "admin"]}
+    },
+    "specialist_profiles": {
+      "columns": ["id", "user_id", "direction", "hours_per_week", "portfolio", "created_at", "updated_at"],
+      "unique": [["user_id"]],
+      "foreign_keys": {"user_id": "users"}
+    },
+    "skills": {
+      "columns": ["id", "name", "direction"],
+      "unique": [],
+      "foreign_keys": {}
+    },
+    "specialist_skills": {
+      "columns": ["id", "profile_id", "skill_id", "level"],
+      "unique": [["profile_id", "skill_id"]],
+      "foreign_keys": {"profile_id": "specialist_profiles", "skill_id": "skills"}
+    },
+    "projects": {
+      "columns": ["id", "owner_id", "title", "description", "stage", "status", "recruitment_status", "last_activity_confirmation", "created_at", "updated_at"],
+      "unique": [],
+      "foreign_keys": {"owner_id": "users"},
+      "values": {
+        "status": ["draft", "active", "completed", "archived"],
+        "recruitment_status": ["draft", "open", "closed"]
+      }
+    },
+    "project_roles": {
+      "columns": ["id", "project_id", "title", "tasks", "hours_per_week", "status", "created_at", "updated_at"],
+      "unique": [],
+      "foreign_keys": {"project_id": "projects"},
+      "values": {"status": ["open", "closed"]}
+    },
+    "role_skills": {
+      "columns": ["id", "project_role_id", "skill_id", "required_level"],
+      "unique": [["project_role_id", "skill_id"]],
+      "foreign_keys": {"project_role_id": "project_roles", "skill_id": "skills"}
+    },
+    "applications": {
+      "columns": ["id", "specialist_profile_id", "project_role_id", "motivation", "confirmed_hours", "status", "rejection_reason", "created_at", "updated_at"],
+      "unique": [["specialist_profile_id", "project_role_id"]],
+      "foreign_keys": {"specialist_profile_id": "specialist_profiles", "project_role_id": "project_roles"},
+      "values": {"status": ["sent", "viewed", "accepted", "rejected", "postponed"]}
+    },
+    "team_members": {
+      "columns": ["id", "project_id", "project_role_id", "specialist_profile_id", "tasks", "status", "joined_at", "updated_at"],
+      "unique": [],
+      "foreign_keys": {
+        "project_id": "projects",
+        "project_role_id": "project_roles",
+        "specialist_profile_id": "specialist_profiles"
+      },
+      "values": {"status": ["active", "left"]}
+    },
+    "notifications": {
+      "columns": ["id", "user_id", "type", "message", "status", "created_at", "sent_at"],
+      "unique": [],
+      "foreign_keys": {"user_id": "users"},
+      "values": {"status": ["created", "sent", "failed"]}
+    }
+  },
+  "domain_rules": {
+    "hours_per_week_min": 0,
+    "application_motivation_max_length": 500,
+    "application_status_transitions_are_domain_validated": true
+  },
+  "profile_input": {
+    "fields": ["direction", "skills", "hours_per_week", "portfolio"],
+    "skill_fields": ["skill_id", "level"],
+    "skill_levels": ["basic", "confident", "advanced"]
+  },
+  "pgvector": {
+    "required_for_mvp": false,
+    "vector_columns": [],
+    "matching_mode": "deterministic",
+    "note": "Расширение может быть установлено для будущего EmbeddingService, но MVP не хранит векторы и не зависит от семантического поиска."
+  }
+}

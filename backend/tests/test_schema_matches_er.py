@@ -1,33 +1,27 @@
-"""День 3. Сверка схемы БД с ER: таблицы, ключи, UNIQUE, CHECK."""
+"""День 3. Сверка схемы БД с каноническим контрактом ADR-001."""
+import json
+from pathlib import Path
+
 from sqlalchemy import inspect
 
 from app.models import EXPECTED_TABLES
 
-UNIQUES = {
-    "users": [["telegram_id"]],
-    "user_roles": [["user_id", "role"]],
-    "skills": [["name_normalized"]],
-    "specialist_profiles": [["user_id"]],
-    "specialist_skills": [["profile_id", "skill_id"]],
-    "role_skills": [["project_role_id", "skill_id"]],
-    "applications": [["specialist_profile_id", "project_role_id"]],
-}
-FOREIGN_KEYS = {
-    "user_roles": {"user_id": "users"},
-    "specialist_profiles": {"user_id": "users"},
-    "specialist_skills": {"profile_id": "specialist_profiles", "skill_id": "skills"},
-    "projects": {"founder_id": "users"},
-    "project_roles": {"project_id": "projects"},
-    "role_skills": {"project_role_id": "project_roles", "skill_id": "skills"},
-    "applications": {"specialist_profile_id": "specialist_profiles", "project_role_id": "project_roles"},
-    "team_members": {"project_role_id": "project_roles", "user_id": "users"},
-    "notifications": {"user_id": "users"},
-}
+CONTRACT_PATH = Path(__file__).parents[2] / "docs" / "architecture" / "data-contract.json"
+TABLES = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))["tables"]
+UNIQUES = {name: table["unique"] for name, table in TABLES.items() if table["unique"]}
+FOREIGN_KEYS = {name: table["foreign_keys"] for name, table in TABLES.items() if table["foreign_keys"]}
 
 
 def test_exactly_11_tables(engine):
-    assert sorted(inspect(engine).get_table_names()) == sorted(EXPECTED_TABLES)
-    assert len(EXPECTED_TABLES) == 11
+    assert set(EXPECTED_TABLES) == set(TABLES)
+    assert set(inspect(engine).get_table_names()) == set(TABLES)
+
+
+def test_columns_match_contract(engine):
+    insp = inspect(engine)
+    for table_name, table in TABLES.items():
+        actual = {column["name"] for column in insp.get_columns(table_name)}
+        assert actual == set(table["columns"]), f"{table_name}: колонки не совпадают с ADR-001"
 
 
 def test_unique_constraints_present(engine):
