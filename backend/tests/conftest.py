@@ -56,7 +56,7 @@ def app(engine, tmp_path):
     def owned(owner_id: int, user: User = Depends(current_user), session: Session = Depends(get_session)):
         require_owner(owner_id, user)
         owner = session.get(User, owner_id)
-        return {"id": owner.id, "first_name": owner.first_name, "username": owner.username}
+        return {"id": owner.id, "name": owner.name}
 
     @application.get("/probe/raise/{code}")
     def raise_code(code: str):

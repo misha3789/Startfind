@@ -71,7 +71,7 @@ def test_own_data_is_available(client, login):
     h = login(1001, "Алиса")
     me = client.get("/me", headers=h).json()
     r = client.get(f"/probe/users/{me['id']}", headers=h)
-    assert r.status_code == 200 and r.json()["first_name"] == "Алиса"
+    assert r.status_code == 200 and r.json()["name"] == "Алиса"
 
 
 def test_foreign_data_gives_403_without_leak(client, login):

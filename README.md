@@ -15,5 +15,8 @@ Python, FastAPI, SQLAlchemy, Alembic, PostgreSQL; React, Vite, Telegram WebApp S
 ## Структура
 backend/ — серверная часть и тесты; frontend/ — Mini App; docs/ — документация и отчёты.
 
+Канонический контракт данных MVP и принятые архитектурные решения описаны в
+[`docs/architecture/ADR-001-data-contract.md`](docs/architecture/ADR-001-data-contract.md).
+
 ## Как работать
 См. docs/CONTRIBUTING.md: ветки, коммиты, pull request.
