@@ -3,7 +3,10 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-os.environ.setdefault("BOT_TOKEN", "123456:TEST-TOKEN-NOT-A-REAL-ONE")
+from tests.helpers import BOT_TOKEN
+
+# Токен всегда тестовый: настоящий токен из окружения или пустой BOT_TOKEN из .env.example сломали бы тесты.
+os.environ["BOT_TOKEN"] = BOT_TOKEN
 
 # Модули приложения (app.db, app.main, app.models, app.access) импортируются внутри фикстур,
 # поэтому тесты, которым приложение не нужно (test_init_data.py, часть test_errors.py),
