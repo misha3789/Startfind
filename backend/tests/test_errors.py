@@ -57,8 +57,8 @@ def test_code_prefix_defines_type():
 
 
 @pytest.mark.parametrize("code", sorted(EXPECTED))
-def test_every_code_returns_unified_body(client, code):
-    r = client.get(f"/probe/raise/{code}")
+def test_every_code_returns_unified_body(bare_client, code):
+    r = bare_client.get(f"/probe/raise/{code}")
     body = r.json()
     expected_http = EXPECTED[code] if EXPECTED[code] is not None else 200
     assert r.status_code == expected_http
@@ -68,8 +68,8 @@ def test_every_code_returns_unified_body(client, code):
     assert body["request_id"] == r.headers["X-Request-ID"]
 
 
-def test_unexpected_exception_gives_sys_internal_without_stack(client):
-    r = client.get("/probe/crash")
+def test_unexpected_exception_gives_sys_internal_without_stack(bare_client):
+    r = bare_client.get("/probe/crash")
     body = r.json()
     assert r.status_code == 500 and body["code"] == "SYS_INTERNAL"
     text = r.text
@@ -78,9 +78,9 @@ def test_unexpected_exception_gives_sys_internal_without_stack(client):
         assert leak not in text
 
 
-def test_stack_goes_to_log_not_to_user(client, caplog):
+def test_stack_goes_to_log_not_to_user(bare_client, caplog):
     caplog.set_level("ERROR", logger="startfind")
-    client.get("/probe/crash")
+    bare_client.get("/probe/crash")
     assert "RuntimeError" in caplog.text and "hunter2" in caplog.text or "RuntimeError" in caplog.text
 
 
@@ -93,8 +93,8 @@ def test_request_validation_error_uses_same_format(client, login):
     assert "request_id" in body
 
 
-def test_client_request_id_is_preserved(client):
-    r = client.get("/probe/raise/NF_PROJECT", headers={"X-Request-ID": "abc-123"})
+def test_client_request_id_is_preserved(bare_client):
+    r = bare_client.get("/probe/raise/NF_PROJECT", headers={"X-Request-ID": "abc-123"})
     assert r.json()["request_id"] == "abc-123" and r.headers["X-Request-ID"] == "abc-123"
 
 
@@ -113,10 +113,10 @@ def test_exception_hierarchy_default_codes(cls, code):
     assert issubclass(cls, AppError) and cls().code == code
 
 
-def test_fields_are_passed_through(client, app):
-    @app.get("/probe/fields")
+def test_fields_are_passed_through(bare_client, bare_app):
+    @bare_app.get("/probe/fields")
     def _f():
         raise ValidationAppError("VAL_APPLICATION", fields=[{"field": "motivation", "issue": "too_long", "limit": 500}])
 
-    body = client.get("/probe/fields").json()
+    body = bare_client.get("/probe/fields").json()
     assert body["fields"] == [{"field": "motivation", "issue": "too_long", "limit": 500}]

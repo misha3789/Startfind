@@ -33,12 +33,12 @@ def test_is01_no_authorization_header_gives_401(client):
 # ---- ИС-02 -----------------------------------------------------------------------
 def test_is02_user_without_name_is_created(client):
     r = client.post("/auth/telegram", headers=auth_header({"id": 555}))
-    assert r.status_code == 200 and r.json()["first_name"] == "Участник Startfind"
+    assert r.status_code == 200 and r.json()["name"] == "Участник Startfind"
 
 
 def test_is02_username_used_instead_of_missing_name(client):
     r = client.post("/auth/telegram", headers=auth_header({"id": 556, "username": "anon"}))
-    assert r.json()["first_name"] == "anon"
+    assert r.json()["name"] == "anon"
 
 
 # ---- ИС-03 -----------------------------------------------------------------------

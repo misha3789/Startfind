@@ -49,7 +49,7 @@ def validate_init_data(init_data: str, bot_token: str, *, max_age: int = 86400,
     try:
         pairs = dict(parse_qsl(init_data, keep_blank_values=True, strict_parsing=True))
     except ValueError:
-        raise _invalid()
+        raise _invalid() from None
     received_hash = pairs.pop("hash", None)
     if not received_hash:
         raise _invalid()
@@ -61,7 +61,7 @@ def validate_init_data(init_data: str, bot_token: str, *, max_age: int = 86400,
     try:
         auth_date = int(pairs["auth_date"])
     except (KeyError, ValueError):
-        raise _invalid()
+        raise _invalid() from None
     if auth_date > now + CLOCK_SKEW or now - auth_date > max_age:
         raise _invalid()
 
@@ -69,7 +69,7 @@ def validate_init_data(init_data: str, bot_token: str, *, max_age: int = 86400,
         user = json.loads(pairs["user"])
         user_id = int(user["id"])
     except (KeyError, ValueError, TypeError):
-        raise _invalid()
+        raise _invalid() from None
     return TelegramUser(
         id=user_id,
         first_name=user.get("first_name") or None,

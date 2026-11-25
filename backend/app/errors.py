@@ -58,7 +58,8 @@ CATALOG: dict[str, ErrorSpec] = {s.code: s for s in [
     _s("SYS_INTERNAL", 500, "Что-то пошло не так.", "ИС-46"),
     _s("SYS_TRANSACTION_FAILED", 503, "Не удалось сохранить решение. Попробуйте ещё раз.", "ИС-37"),
 ]}
-assert len(CATALOG) == 27
+if len(CATALOG) != 27:
+    raise RuntimeError("справочник ошибок должен содержать 27 кодов")
 
 TYPE_PREFIXES = ("AUTH", "ACCESS", "VAL", "RULE", "NF", "EXT", "SYS")
 
@@ -139,8 +140,8 @@ def install_handlers(app) -> None:
             response = await call_next(request)
         except Exception:  # непредвиденная ошибка → SYS_INTERNAL без стека для клиента
             logger.exception("unhandled error request_id=%s path=%s", request.state.request_id, request.url.path)
-            return JSONResponse(error_body("SYS_INTERNAL", request.state.request_id,
-                                           message=f"{CATALOG['SYS_INTERNAL'].message} Номер запроса: {request.state.request_id}"),
+            message = f"{CATALOG['SYS_INTERNAL'].message} Номер запроса: {request.state.request_id}"
+            return JSONResponse(error_body("SYS_INTERNAL", request.state.request_id, message=message),
                                 status_code=500)
         response.headers["X-Request-ID"] = request.state.request_id
         return response
