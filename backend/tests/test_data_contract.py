@@ -22,6 +22,11 @@ def test_all_foreign_keys_target_declared_tables():
         assert set(table["foreign_keys"].values()) <= set(tables), table_name
 
 
+def test_skill_name_has_case_insensitive_unique_index():
+    indexes = CONTRACT["tables"]["skills"]["unique_indexes"]
+    assert indexes == [{"name": "uq_skills_name_lower", "expression": "lower(name)"}]
+
+
 def test_application_statuses_follow_architecture_pdf():
     statuses = CONTRACT["tables"]["applications"]["values"]["status"]
     assert statuses == ["sent", "viewed", "accepted", "rejected", "postponed"]

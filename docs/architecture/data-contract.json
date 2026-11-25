@@ -21,6 +21,9 @@
     "skills": {
       "columns": ["id", "name", "direction"],
       "unique": [],
+      "unique_indexes": [
+        {"name": "uq_skills_name_lower", "expression": "lower(name)"}
+      ],
       "foreign_keys": {}
     },
     "specialist_skills": {
