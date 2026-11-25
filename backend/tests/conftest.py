@@ -34,17 +34,49 @@ def session(engine):
     s.close()
 
 
+def _settings(database_url):
+    from app.config import Settings
+    return Settings(bot_token=BOT_TOKEN, database_url=database_url)
+
+
+def _add_error_probes(application):
+    """Маршруты-пробы единого формата ошибок: не требуют БД."""
+    from app.errors import AppError
+
+    @application.get("/probe/raise/{code}")
+    def raise_code(code: str):
+        raise AppError(code)
+
+    @application.get("/probe/crash")
+    def crash():
+        raise RuntimeError("secret-internal-detail: password=hunter2")
+
+
+@pytest.fixture()
+def bare_app():
+    """Приложение без БД: проверяет каркас, /health и обработчики ошибок."""
+    from app.main import create_app
+    application = create_app(_settings("sqlite://"))
+    _add_error_probes(application)
+    return application
+
+
+@pytest.fixture()
+def bare_client(bare_app):
+    return TestClient(bare_app, raise_server_exceptions=False)
+
+
 @pytest.fixture()
 def app(engine, tmp_path):
     from fastapi import Depends
     from sqlalchemy.orm import Session
 
     from app.access import current_user, get_session, require_owner, require_role
-    from app.errors import AppError
     from app.main import create_app
     from app.models import User
 
-    application = create_app(str(engine.url), create_schema=False)
+    application = create_app(_settings(engine.url.render_as_string(hide_password=False)))
+    _add_error_probes(application)
 
     # служебные маршруты-пробы: проверяют три рубежа доступа до появления настоящих эндпоинтов
     @application.get("/probe/founder-only")
@@ -60,14 +92,6 @@ def app(engine, tmp_path):
         require_owner(owner_id, user)
         owner = session.get(User, owner_id)
         return {"id": owner.id, "name": owner.name}
-
-    @application.get("/probe/raise/{code}")
-    def raise_code(code: str):
-        raise AppError(code)
-
-    @application.get("/probe/crash")
-    def crash():
-        raise RuntimeError("secret-internal-detail: password=hunter2")
 
     return application
 
