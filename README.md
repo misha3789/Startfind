@@ -9,6 +9,11 @@ Telegram Mini App и бот для подбора специалистов в к
 ## Стек
 Python, FastAPI, SQLAlchemy, Alembic, PostgreSQL; React, Vite, Telegram WebApp SDK; pytest; Timeweb.
 
+## Среда разработки
+Поддерживается Python 3.12.x (`>=3.12,<3.13`). Команда проверила проект на
+Python 3.12.3 и 3.12.16. Версии backend-зависимостей зафиксированы в
+`backend/requirements.txt`.
+
 ## Быстрый старт
 Скопировать .env.example в .env, заполнить, затем docker compose up и pytest в папке backend.
 
