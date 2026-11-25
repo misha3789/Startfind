@@ -12,6 +12,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -143,13 +144,20 @@ class RoleSkill(Base):
     required_level: Mapped[str] = mapped_column(String(32), nullable=False, default="basic", server_default="basic")
 
 
+ACTIVE_APPLICATION_STATUSES = ("sent", "viewed", "accepted", "postponed")
+ACTIVE_APPLICATION_PREDICATE = "status IN ('sent', 'viewed', 'accepted', 'postponed')"
+
+
 class Application(Base):
     __tablename__ = "applications"
     __table_args__ = (
-        UniqueConstraint(
+        Index(
+            "uq_applications_active_profile_role",
             "specialist_profile_id",
             "project_role_id",
-            name="uq_applications_profile_role",
+            unique=True,
+            postgresql_where=text(ACTIVE_APPLICATION_PREDICATE),
+            sqlite_where=text(ACTIVE_APPLICATION_PREDICATE),
         ),
         CheckConstraint(
             "status IN ('sent', 'viewed', 'accepted', 'rejected', 'postponed')",
