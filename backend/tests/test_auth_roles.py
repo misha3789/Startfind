@@ -165,3 +165,14 @@ def test_domain_layer_also_rejects_admin_role(session):
     user = get_or_create_user(session, tg)
     with pytest.raises(ValidationAppError):
         add_role(session, user.id, "admin")
+
+
+def test_integration_login_then_role_then_me(client):
+    """Сквозной сценарий этапа 2: вход → выбор роли → чтение профиля доступа."""
+    headers = auth_header({"id": 777001, "first_name": "Анна"})
+    r = client.post("/auth/telegram", headers=headers)
+    assert r.status_code == 200 and r.json()["roles"] == []
+    r = client.post("/me/roles", headers=headers, json={"role": "specialist"})
+    assert r.status_code == 200
+    r = client.get("/me", headers=headers)
+    assert r.json()["name"] == "Анна" and r.json()["roles"] == ["specialist"]
