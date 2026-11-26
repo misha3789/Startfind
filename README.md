@@ -7,7 +7,7 @@ Telegram Mini App и бот для подбора специалистов в к
 - Безруков М. А. — тестировщик
 
 ## Стек
-Python 3.11, FastAPI, SQLAlchemy, Alembic, PostgreSQL; React, Vite, Telegram WebApp SDK; pytest; Timeweb.
+Python 3.12, FastAPI, SQLAlchemy, Alembic, PostgreSQL; React, Vite, Telegram WebApp SDK; pytest; Timeweb.
 
 ## Среда разработки
 Поддерживается Python 3.12.x (`>=3.12,<3.13`). Команда проверила проект на

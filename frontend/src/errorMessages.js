@@ -1,6 +1,7 @@
 // Тексты ошибок для 27 кодов. Источник: backend/app/errors.py (CATALOG).
 // Если сервер прислал message (например, со статусом отклика), показываем его: он точнее.
 // silent: true — ситуация фоновая, пользователю ошибка не показывается.
+// dynamic: true — сервер подставляет в текст статус вместо «…»; пока в сообщении остался шаблон «…», показываем локальный текст.
 // action — подсказка для кнопки: "reopen" (перезапуск), "addRole", "retry", "profile".
 export const ERROR_MESSAGES = {
   AUTH_INVALID_INIT_DATA: { text: "Сессия устарела. Откройте Startfind заново из Telegram.", action: "reopen" },
@@ -15,8 +16,8 @@ export const ERROR_MESSAGES = {
   VAL_ROLE_WITHOUT_SKILLS: { text: "Укажите хотя бы один навык для роли." },
   VAL_SKILL_NOT_IN_CATALOG: { text: "Такого навыка нет в справочнике — выберите из списка." },
   RULE_ALREADY_MEMBER: { text: "Специалист уже в команде на этой роли." },
-  RULE_DUPLICATE_APPLICATION: { text: "Вы уже откликнулись на эту роль." },
-  RULE_INVALID_STATUS_TRANSITION: { text: "Этот отклик уже в другом статусе, действие недоступно." },
+  RULE_DUPLICATE_APPLICATION: { text: "Вы уже откликнулись на эту роль.", dynamic: true },
+  RULE_INVALID_STATUS_TRANSITION: { text: "Этот отклик уже в другом статусе, действие недоступно.", dynamic: true },
   RULE_PROFILE_REQUIRED: { text: "Сначала заполните профиль — он приложится к отклику автоматически.", action: "profile" },
   RULE_PROJECT_NOT_ACTIVE: { text: "Проект сейчас не набирает участников." },
   RULE_ROLE_CLOSED: { text: "Набор на эту роль закрыт. Посмотрите другие роли проекта." },
