@@ -1,12 +1,11 @@
-export default function Home({ userName, insideTelegram }) {
+import { ROLE_LABELS } from "./RoleSelect.jsx";
+
+export default function Home({ user, activeRole }) {
   return (
     <section>
-      <h1>Startfind</h1>
-      <p>Подбор специалистов в команды стартапов.</p>
-      <p className="muted">
-        {userName ? `Привет, ${userName}!` : "Гость"}
-        {!insideTelegram && " (открыто вне Telegram)"}
-      </p>
+      <h1>Привет, {user.name}!</h1>
+      <p className="muted">Активная роль: {ROLE_LABELS[activeRole] ?? activeRole}</p>
+      <p>Профиль и подбор проектов появятся в следующих версиях.</p>
     </section>
   );
 }
