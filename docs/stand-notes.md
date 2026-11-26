@@ -4,3 +4,5 @@
   отдаёт `frontend/dist` и проксирует `/auth`, `/me`, `/skills`, `/directions`, `/health` на backend:8000.
 - Токен бота — только в `.env` на сервере (права 600).
 - После `docker compose up`: `docker compose exec backend python -m scripts.seed_skills`.
+- На стенде обязательно задать настоящий `BOT_TOKEN`: если он пуст, compose подставит публичную заглушку,
+  и любой сможет подписать «валидный» initData. Также сменить пароль PostgreSQL и не публиковать порт 5432.
