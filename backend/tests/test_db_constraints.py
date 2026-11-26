@@ -66,6 +66,12 @@ def test_04_skills_name_required(session):
     violates(session, Skill(name=None, direction="backend"))
 
 
+@pytest.mark.parametrize("duplicate", ["python", "PYTHON"])
+def test_04b_skills_name_unique_case_insensitive(session, duplicate):   # ИС-09
+    skill(session, "Python")
+    violates(session, Skill(name=duplicate, direction="backend"))
+
+
 def test_05_specialist_profiles_user_unique(session):
     u = user(session); profile(session, u)
     violates(session, SpecialistProfile(user_id=u.id, hours_per_week=5))

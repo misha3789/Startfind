@@ -1,14 +1,29 @@
 """Точка входа: фабрика приложения FastAPI."""
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from .config import Settings, get_settings
+from .db import make_engine, make_session_factory
 from .errors import install_handlers
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
-    app = FastAPI(title="Startfind API")
+    engine = make_engine(settings.database_url)
+    session_factory = make_session_factory(engine)
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        try:
+            yield
+        finally:
+            engine.dispose()
+
+    app = FastAPI(title="Startfind API", lifespan=lifespan)
     app.state.settings = settings
+    app.state.engine = engine
+    app.state.session_factory = session_factory
     install_handlers(app)
 
     @app.get("/health")
