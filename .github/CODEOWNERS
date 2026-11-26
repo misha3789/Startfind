@@ -1,0 +1,15 @@
+# Владельцы кода: автоматически назначаются на ревью
+/backend/app/models.py @aarchiyo
+/backend/app/db.py @aarchiyo
+/backend/alembic/ @aarchiyo
+/docs/architecture/ @aarchiyo
+/backend/app/main.py @misha3789
+/backend/app/access.py @misha3789
+/backend/app/api/auth.py @misha3789
+/backend/app/security.py @misha3789
+/backend/app/errors.py @misha3789
+/backend/tests/ @misha3789
+/.github/ @misha3789
+/frontend/ @Salva-toreDS
+/docker-compose.yml @Salva-toreDS
+/docs/reports/ @Salva-toreDS

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from .api.auth import router as auth_router
 from .config import Settings, get_settings
 from .db import make_engine, make_session_factory
 from .errors import install_handlers
@@ -25,6 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.engine = engine
     app.state.session_factory = session_factory
     install_handlers(app)
+    app.include_router(auth_router)
 
     @app.get("/health")
     def health() -> dict:
