@@ -136,3 +136,32 @@ def test_is06_after_adding_role_action_is_allowed(client, login):
     assert client.get("/probe/founder-only", headers=h).status_code == 403
     client.post("/me/roles", json={"role": "founder"}, headers=h)
     assert client.get("/probe/founder-only", headers=h).status_code == 200
+
+
+# ---- дополнительные проверки входа и ролей -------------------------------------------
+def test_is02_name_is_first_and_last_name(client):
+    r = client.post("/auth/telegram", headers=auth_header({"id": 700, "first_name": "Иван", "last_name": "Петров"}))
+    assert r.json()["name"] == "Иван Петров"
+
+
+def test_is02_blank_name_falls_back_to_username_then_default(client):
+    r = client.post("/auth/telegram", headers=auth_header({"id": 701, "first_name": "  ", "username": "ivan"}))
+    assert r.json()["name"] == "ivan"
+    r = client.post("/auth/telegram", headers=auth_header({"id": 702, "first_name": "  "}))
+    assert r.json()["name"] == "Участник Startfind"
+
+
+def test_unauthenticated_request_with_invalid_body_gives_401_not_422(client):
+    r = client.post("/me/roles", json={"role": "boss"})
+    assert r.status_code == 401 and r.json()["code"] == "AUTH_INVALID_INIT_DATA"
+
+
+def test_domain_layer_also_rejects_admin_role(session):
+    import pytest
+
+    from app.access import add_role
+    from app.errors import ValidationAppError
+    tg = TelegramUser(id=3003, first_name="Админ", last_name=None, username=None, photo_url=None, auth_date=0)
+    user = get_or_create_user(session, tg)
+    with pytest.raises(ValidationAppError):
+        add_role(session, user.id, "admin")
