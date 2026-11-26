@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: startfind
       POSTGRES_DB: startfind
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"   # только локально; на стенде порт наружу не открывать
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +27,7 @@ services:
       # Внутри сети compose база доступна по имени сервиса db, а не localhost.
       DATABASE_URL: postgresql+psycopg://startfind:startfind@db:5432/startfind
       # backend не стартует с пустым BOT_TOKEN, а в .env.example он пустой: для локального запуска
-      # подставляется заглушка (вход через Telegram при ней не пройдёт — нужен настоящий токен).
+      # подставляется заглушка. ТОЛЬКО для разработки: заглушка публична, на стенде BOT_TOKEN обязателен.
       BOT_TOKEN: ${BOT_TOKEN:-local-dev-token}
       INIT_DATA_MAX_AGE: ${INIT_DATA_MAX_AGE:-86400}
     volumes:

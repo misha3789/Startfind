@@ -17,7 +17,8 @@ export default function ErrorMessage({ error, onAction }) {
   if (spec.silent) return null;
 
   // Приоритет у текста сервера: в нём может быть статус отклика и номер запроса.
-  const text = error.message || spec.text;
+  const serverUsable = error.message && !(spec.dynamic && error.message.includes("…"));
+  const text = serverUsable ? error.message : spec.text;
   const fields = Array.isArray(error.fields) ? error.fields : [];
 
   return (
