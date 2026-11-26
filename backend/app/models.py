@@ -43,7 +43,7 @@ class UserRole(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False)
 
 
@@ -55,7 +55,7 @@ class SpecialistProfile(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     direction: Mapped[str | None] = mapped_column(String(255))
     hours_per_week: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     portfolio: Mapped[str | None] = mapped_column(Text)
@@ -84,7 +84,7 @@ class SpecialistSkill(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("specialist_profiles.id"), nullable=False)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("specialist_profiles.id", ondelete="CASCADE"), nullable=False)
     skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), nullable=False)
     level: Mapped[str] = mapped_column(String(32), nullable=False, default="basic", server_default="basic")
 
@@ -97,7 +97,7 @@ class Project(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     stage: Mapped[str | None] = mapped_column(String(255))
@@ -120,7 +120,7 @@ class ProjectRole(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     tasks: Mapped[str | None] = mapped_column(Text)
     hours_per_week: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
@@ -139,7 +139,7 @@ class RoleSkill(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"), nullable=False)
+    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id", ondelete="CASCADE"), nullable=False)
     skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), nullable=False)
     required_level: Mapped[str] = mapped_column(String(32), nullable=False, default="basic", server_default="basic")
 
@@ -166,8 +166,10 @@ class Application(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    specialist_profile_id: Mapped[int] = mapped_column(ForeignKey("specialist_profiles.id"), nullable=False)
-    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"), nullable=False)
+    specialist_profile_id: Mapped[int] = mapped_column(
+        ForeignKey("specialist_profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id", ondelete="CASCADE"), nullable=False)
     motivation: Mapped[str | None] = mapped_column(Text)
     confirmed_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="sent", server_default="sent")
@@ -185,9 +187,11 @@ class TeamMember(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"), nullable=False)
-    specialist_profile_id: Mapped[int] = mapped_column(ForeignKey("specialist_profiles.id"), nullable=False)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id", ondelete="CASCADE"), nullable=False)
+    specialist_profile_id: Mapped[int] = mapped_column(
+        ForeignKey("specialist_profiles.id", ondelete="CASCADE"), nullable=False
+    )
     tasks: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active", server_default="active")
     joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
@@ -203,7 +207,7 @@ class Notification(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     type: Mapped[str] = mapped_column(String(255), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="created", server_default="created")
